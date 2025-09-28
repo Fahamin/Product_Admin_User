@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
 
 class ProductController extends Controller
 {
@@ -14,9 +15,11 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products'));
     }
 
+    
     public function create()
     {
-        return view('admin.products.create');
+            $categories = Category::all(); // Assuming you have a Category model
+            return view('admin.products.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -24,10 +27,11 @@ class ProductController extends Controller
         $request->validate([
             'name'  => 'required',
             'price' => 'required|numeric',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
+            'category_id' => 'required|exists:categories,id',
         ]);
 
-        $data = $request->only(['name', 'description', 'price']);
+        $data = $request->only(['name', 'description', 'price', 'category_id']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');

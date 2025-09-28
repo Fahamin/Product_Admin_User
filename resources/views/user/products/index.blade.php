@@ -7,7 +7,7 @@
                 @if($product->image)
                     <img src="{{ asset('storage/'.$product->image) }}" 
                          alt="{{ $product->name }}"
-                         class="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105">
+                         class="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-10">
                 @else
                     <div class="w-full h-32 bg-gray-200 flex items-center justify-center">
                         <span class="text-gray-500 text-sm">No Image</span>
