@@ -1,51 +1,75 @@
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-    @foreach($products as $product)
-        <!-- Product Card -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 border border-gray-100 group">
-            <!-- Product Image -->
-            <div class="relative">
-                @if($product->image)
-                    <img src="{{ asset('storage/'.$product->image) }}" 
-                         alt="{{ $product->name }}"
-                         class="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-10">
-                @else
-                    <div class="w-full h-32 bg-gray-200 flex items-center justify-center">
-                        <span class="text-gray-500 text-sm">No Image</span>
-                    </div>
-                @endif
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Products') }}
+        </h2>
+    </x-slot>
 
-                <!-- Price Badge -->
-                <div class="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
-                    ${{ number_format($product->price, 2) }}
-                </div>
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            {{-- Category Selector --}}
+            <div class="mb-6">
+                <label for="category" class="block mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
+                    Select Category
+                </label>
+                <select id="category" name="category" 
+                        class="w-full md:w-1/3 border-gray-300 rounded-lg shadow-sm">
+                    <option value="">-- Choose Category --</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
             </div>
-            
-            <!-- Product Details -->
-            <div class="p-3 flex flex-col justify-between h-36">
-                <h3 class="text-sm font-semibold text-gray-800 truncate">{{ $product->name }}</h3>
-                
-                <p class="text-gray-500 text-xs line-clamp-2 mt-1">
-                    {{ $product->description ?: 'No description available.' }}
-                </p>
 
-                <div class="mt-3 flex justify-between items-center">
-                    <a href="{{ route('user.products.show', $product) }}" 
-                       class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200">
-                        View
-                    </a>
-                    <button class="text-gray-400 hover:text-red-500 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M5 15l7-7 7 7" />
-                        </svg>
-                    </button>
-                </div>
+            {{-- Products Section --}}
+            <div id="products-container" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {{-- Products will be loaded here via AJAX --}}
             </div>
         </div>
-    @endforeach
-</div>
+    </div>
 
-<!-- Pagination -->
-<div class="mt-6">
-    {{ $products->links() }}
-</div>
+    {{-- jQuery --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+$(document).ready(function () {
+    console.log('Document ready - jQuery working');
+    
+    $('#category').change(function () {
+        const categoryId = $(this).val();
+        console.log('Category selected:', categoryId);
+        
+        // Test if jQuery is working
+        $('#products-container').html(`
+            <div class="col-span-full">
+                <p class="text-green-500">jQuery is working! Selected category: ${categoryId}</p>
+                <p class="text-blue-500">Now testing AJAX call...</p>
+            </div>
+        `);
+        
+        if (categoryId) {
+            // Test direct URL first
+            const testUrl = '/user/products/by-category?category_id=' + categoryId;
+            console.log('Testing URL:', testUrl);
+            
+            $.get(testUrl)
+                .done(function(response) {
+                    console.log('✅ Direct GET success:', response);
+                    $('#products-container').html(response);
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('❌ Direct GET failed:', {status, error, response: xhr.responseText});
+                    $('#products-container').html(`
+                        <div class="col-span-full text-red-500">
+                            <p>Failed to load products</p>
+                            <p>Status: ${xhr.status}</p>
+                            <p>Error: ${error}</p>
+                            <p>Response: ${xhr.responseText}</p>
+                        </div>
+                    `);
+                });
+        }
+    });
+});
+</script>
+</x-app-layout>

@@ -30,9 +30,15 @@ Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(func
 });
 
 Route::middleware('auth')->prefix('user')->name('user.')->group(function(){
-   Route::get('/products', [UserProductController::class, 'index'])->name('products.index');
-   Route::get('/products/{product}', [UserProductController::class, 'show'])->name('products.show');
+    Route::get('/products', [UserProductController::class, 'index'])->name('products.index');
+
+    // ✅ Put this route BEFORE the parameter route
+    Route::get('/products/by-category', [UserProductController::class, 'getByCategory'])->name('products.getByCategory');
+
+    Route::get('/products/{product}', [UserProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{id}/buy', [UserProductController::class, 'buy'])->name('products.buy');
 });
+
 
 
 require __DIR__ . '/auth.php';
